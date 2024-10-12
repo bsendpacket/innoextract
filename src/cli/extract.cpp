@@ -1074,15 +1074,6 @@ void process_file(const fs::path & installer, const extract_options & o) {
 		}
 		
 	}
-	
-	if (o.extract) {
-		fs::path dir = o.output_dir / std::string("embedded");
-		try {
-			fs::create_directory(dir);
-		} catch(...) {
-			throw std::runtime_error("Could not create directory \"" + dir.string() + '"');
-		}
-	}
 
 	typedef std::pair<const processed_file *, boost::uint64_t> output_location;
 	std::vector< std::vector<output_location> > files_for_location;
@@ -1146,6 +1137,12 @@ void process_file(const fs::path & installer, const extract_options & o) {
 	
 	// Extract embedded CompiledCode.bin
 	if (o.extract && !info.header.compiled_code.empty()) {
+		fs::path dir = o.output_dir / std::string("embedded");
+		try {
+			fs::create_directory(dir);
+		} catch(...) {
+			throw std::runtime_error("Could not create directory \"" + dir.string() + '"');
+		}
 
 		fs::path compiled_code_path = o.output_dir / "embedded" / "CompiledCode.bin";
 		std::ofstream compiled_code_file(compiled_code_path.string(), std::ios::out);
@@ -1157,7 +1154,6 @@ void process_file(const fs::path & installer, const extract_options & o) {
 		// Write the contents of compiled_code to the file
 		const std::string& compiled_code = info.header.compiled_code;
 		compiled_code_file.write(compiled_code.data(), static_cast<std::streamsize>(compiled_code.size()));
-
 		compiled_code_file.close();
 
 		std::cout << " - \"" << color::white << "embedded/CompiledCode.bin" << color::reset << '"';
